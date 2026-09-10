@@ -1,0 +1,24 @@
+name: Probe Netlify deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/probe-netlify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe deploy URL
+        shell: bash
+        run: |
+          set -x
+          URL='https://6aa31766f2baaeb7cac29b83--top1-manager.netlify.app/'
+          curl -sSIL --max-time 20 "$URL" || true
+          curl -sSL --max-time 30 -o /tmp/site.html -w 'HTTP=%{http_code} SIZE=%{size_download}\n' "$URL" || true
+          wc -c /tmp/site.html || true
+          head -c 300 /tmp/site.html || true
