@@ -2,23 +2,25 @@
 
 Jogo de gestão de futebol em navegador, com foco em carreira, competições brasileiras, escalação tática, mercado, base, estádio e decisões de treinador.
 
-## Build em desenvolvimento: V36
+## Build atual: V36
 
-A V36 foi preparada a partir da base V35 reorganizada. As principais mudanças são:
+A V36 está publicada no repositório com `index.html` como entrada principal. A base V35 original foi preservada em `index[1].html` e o patch V36 é carregado sobre ela para manter compatibilidade enquanto o projeto continua sendo modularizado.
 
-- navegação mobile em barra inferior com suporte à área segura do aparelho;
+Principais melhorias da V36:
+- navegação mobile em barra inferior;
 - campo tático protegido contra movimentos acidentais por toque;
-- arrastar e trocar posições mantido no desktop;
-- camisas do campo com desenho mais minimalista;
-- ambiente de estádio refeito com Web Audio;
-- sinais sonoros distintos para início/fim, faltas, cartões e gols;
-- rádio da partida com gols, faltas, cartões e substituições;
-- resumo da rodada restaurado e ampliado;
-- competição e fase exibidas dinamicamente;
-- comemoração visual de vitória com torcida/confetes em CSS, sem emojis;
-- preservação da rolagem durante atualizações da mesma tela;
-- saves locais em múltiplos slots mantidos.
+- camisas mais minimalistas;
+- sons distintos de apito e eventos de partida;
+- rádio da partida;
+- resumo da rodada restaurado;
+- preservação de rolagem e melhorias gerais de estabilidade.
 
-## Repositório
+## Estrutura principal
 
-Este é o repositório oficial do Top 1 Manager. A base completa da V36 está sendo mantida de forma modular (`index.html`, `js/`, `assets/`, manifesto PWA e ícones) para facilitar correções e evolução pelo GitHub/Codex.
+- `index.html` — entrada principal do jogo;
+- `index[1].html` — base V35 preservada;
+- `js/26-v36-polish.js` — patch V36;
+- `v36-polish.css` — estilos V36;
+- `manifest.webmanifest` e `sw.js` — PWA/offline;
+- `icon-192.png`, `icon-512.png` e `top1-manager-logo.png` — identidade visual;
+- `rules.html` — página de regras.
