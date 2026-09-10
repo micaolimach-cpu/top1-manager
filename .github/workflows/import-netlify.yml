@@ -1,0 +1,48 @@
+name: Import current Top1 Manager from Netlify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-netlify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download current published game
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://top1-manager.netlify.app"
+          curl -fL --retry 3 --retry-delay 2 "$BASE/" -o index.html
+          grep -qi "Top 1 Manager" index.html
+          test "$(wc -c < index.html)" -gt 1000000
+
+          for file in manifest.webmanifest icon-192.png icon-512.png rules.html; do
+            if curl -fL --retry 2 "$BASE/$file" -o "$file.tmp"; then
+              mv "$file.tmp" "$file"
+            else
+              rm -f "$file.tmp"
+            fi
+          done
+
+      - name: Commit imported site
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html manifest.webmanifest icon-192.png icon-512.png rules.html 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No site changes to commit."
+            exit 0
+          fi
+          git commit -m "Import current Top1 Manager V35 from Netlify"
+          git push
