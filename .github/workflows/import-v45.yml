@@ -1,0 +1,61 @@
+name: Import Top1 Manager V45
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/v45-upload/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  import-v45:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Rebuild V45
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/v45-upload/part-* | base64 -d | xz -d > /tmp/index-v45.html
+          test -s /tmp/index-v45.html
+          grep -q 'v45-stadium-script' /tmp/index-v45.html
+          grep -q "TOP1_BUILD='1.5-estadio'" /tmp/index-v45.html
+          python - <<'PY'
+          from pathlib import Path
+          import re, subprocess, tempfile
+          s=Path('/tmp/index-v45.html').read_text('utf-8')
+          scripts=re.findall(r'<script(?:\\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          assert scripts
+          for i,code in enumerate(scripts):
+              p=Path(f'/tmp/check-{i}.js'); p.write_text(code,'utf-8')
+              subprocess.run(['node','--check',str(p)],check=True,capture_output=True)
+          print(f'Validated {len(scripts)} inline scripts')
+          PY
+
+      - name: Publish V45 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/index-v45.html index.html
+          sed -i "s/top1-manager-v36/top1-manager-v45/g" sw.js || true
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html sw.js
+          git commit -m 'Publish Top1 Manager V45 stadium build'
+          git push
+
+      - name: Cleanup importer
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .github/v45-upload
+          rm -f .github/workflows/import-v45.yml
+          git add -A
+          git commit -m 'Clean temporary V45 importer' || true
+          git push || true
