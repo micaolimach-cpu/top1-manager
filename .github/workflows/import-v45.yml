@@ -18,19 +18,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Rebuild V45
+      - name: Download and validate V45
         shell: bash
         run: |
           set -euo pipefail
-          cat .github/v45-upload/part-* | base64 -d | xz -d > /tmp/index-v45.html
+          curl -fL --retry 2 'https://drive.usercontent.google.com/download?id=1vLyut6xCMWKfgje9HtwppXv169mACnjV&export=download&confirm=t' -o /tmp/index-v45.html
           test -s /tmp/index-v45.html
           grep -q 'v45-stadium-script' /tmp/index-v45.html
           grep -q "TOP1_BUILD='1.5-estadio'" /tmp/index-v45.html
           python - <<'PY'
           from pathlib import Path
-          import re, subprocess, tempfile
+          import re, subprocess
           s=Path('/tmp/index-v45.html').read_text('utf-8')
-          scripts=re.findall(r'<script(?:\\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
           assert scripts
           for i,code in enumerate(scripts):
               p=Path(f'/tmp/check-{i}.js'); p.write_text(code,'utf-8')
